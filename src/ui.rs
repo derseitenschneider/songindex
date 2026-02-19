@@ -33,14 +33,14 @@ fn category_label(kategorie: &str) -> &str {
 
 fn tag_color(kategorie: &str) -> egui::Color32 {
     match kategorie {
-        "instrument" => egui::Color32::from_rgb(45, 106, 79),    // green
-        "schwierigkeit" => egui::Color32::from_rgb(231, 111, 81), // orange
-        "stil" => egui::Color32::from_rgb(69, 123, 157),          // blue
-        "technik" => egui::Color32::from_rgb(109, 89, 122),       // purple
-        "artist" => egui::Color32::from_rgb(188, 108, 37),        // brown
-        "stimmung" => egui::Color32::from_rgb(96, 108, 56),       // olive
-        "kapo" => egui::Color32::from_rgb(154, 140, 152),         // grey
-        _ => egui::Color32::from_rgb(100, 100, 100),
+        "instrument" => egui::Color32::from_rgb(56, 130, 98),     // green
+        "schwierigkeit" => egui::Color32::from_rgb(235, 125, 100), // orange
+        "stil" => egui::Color32::from_rgb(85, 145, 180),           // blue
+        "technik" => egui::Color32::from_rgb(135, 112, 150),       // purple
+        "artist" => egui::Color32::from_rgb(200, 130, 55),         // brown
+        "stimmung" => egui::Color32::from_rgb(120, 135, 72),       // olive
+        "kapo" => egui::Color32::from_rgb(160, 150, 165),          // grey
+        _ => egui::Color32::from_rgb(130, 130, 130),
     }
 }
 
@@ -173,8 +173,24 @@ impl eframe::App for SongIndexApp {
             self.refresh_data();
         }
 
-        // Dark visuals
-        ctx.set_visuals(egui::Visuals::dark());
+        // Dark visuals + larger fonts
+        let mut visuals = egui::Visuals::dark();
+        let dark_bg = egui::Color32::from_rgb(20, 20, 28);
+        let surface = egui::Color32::from_rgb(28, 28, 38);
+        visuals.panel_fill = dark_bg;
+        visuals.window_fill = surface;
+        visuals.extreme_bg_color = egui::Color32::from_rgb(14, 14, 20);
+        visuals.faint_bg_color = egui::Color32::from_rgb(30, 30, 42);
+        visuals.widgets.noninteractive.bg_fill = surface;
+        ctx.set_visuals(visuals);
+        let mut style = (*ctx.style()).clone();
+        use egui::TextStyle;
+        style.text_styles.insert(TextStyle::Small, egui::FontId::proportional(13.0));
+        style.text_styles.insert(TextStyle::Body, egui::FontId::proportional(16.0));
+        style.text_styles.insert(TextStyle::Button, egui::FontId::proportional(16.0));
+        style.text_styles.insert(TextStyle::Heading, egui::FontId::proportional(22.0));
+        style.text_styles.insert(TextStyle::Monospace, egui::FontId::monospace(15.0));
+        ctx.set_style(style);
 
         // Top panel — header with stats
         egui::TopBottomPanel::top("header").show(ctx, |ui| {
@@ -184,13 +200,13 @@ impl eframe::App for SongIndexApp {
                     ui.label(
                         egui::RichText::new(format!("{} ohne Tags", self.stats.untagged_songs))
                             .small()
-                            .color(egui::Color32::LIGHT_GRAY),
+                            .color(egui::Color32::from_rgb(230, 230, 235)),
                     );
                     ui.separator();
                     ui.label(
                         egui::RichText::new(format!("{} mit Audio", self.stats.songs_with_audio))
                             .small()
-                            .color(egui::Color32::LIGHT_GRAY),
+                            .color(egui::Color32::from_rgb(230, 230, 235)),
                     );
                     ui.separator();
                     ui.label(
@@ -242,7 +258,7 @@ impl eframe::App for SongIndexApp {
                         ui.label(
                             egui::RichText::new(format!("{}:", category_label(cat_name)))
                                 .small()
-                                .color(egui::Color32::GRAY),
+                                .color(egui::Color32::from_rgb(220, 220, 225)),
                         );
                         for tag in &group.tags {
                             let is_active = self
@@ -278,7 +294,7 @@ impl eframe::App for SongIndexApp {
                 ui.label(
                     egui::RichText::new("Extras:")
                         .small()
-                        .color(egui::Color32::GRAY),
+                        .color(egui::Color32::from_rgb(220, 220, 225)),
                 );
                 if ui
                     .selectable_label(self.filter_audio, "Nur mit Audio")
@@ -307,7 +323,7 @@ impl eframe::App for SongIndexApp {
             ui.horizontal(|ui| {
                 ui.label(
                     egui::RichText::new(format!("{} Songs gefunden", self.songs.len()))
-                        .color(egui::Color32::GRAY),
+                        .color(egui::Color32::from_rgb(220, 220, 225)),
                 );
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     let current_label = self.sort_mode.label();
@@ -342,7 +358,7 @@ impl eframe::App for SongIndexApp {
                         ui.centered_and_justified(|ui| {
                             ui.label(
                                 egui::RichText::new("Keine Songs gefunden.")
-                                    .color(egui::Color32::GRAY),
+                                    .color(egui::Color32::from_rgb(220, 220, 225)),
                             );
                         });
                         return;
@@ -359,7 +375,7 @@ impl eframe::App for SongIndexApp {
                                     if let Some(ref artist) = song.artist {
                                         ui.label(
                                             egui::RichText::new(format!("— {artist}"))
-                                                .color(egui::Color32::GRAY),
+                                                .color(egui::Color32::from_rgb(220, 220, 225)),
                                         );
                                     }
                                     if song.has_audio {
@@ -369,7 +385,7 @@ impl eframe::App for SongIndexApp {
                                                 ui.label(
                                                     egui::RichText::new("Audio")
                                                         .small()
-                                                        .color(egui::Color32::from_rgb(45, 106, 79)),
+                                                        .color(egui::Color32::from_rgb(100, 200, 150)),
                                                 );
                                             },
                                         );
@@ -414,7 +430,7 @@ impl eframe::App for SongIndexApp {
                                     ui.label(
                                         egui::RichText::new(&song.dateipfad)
                                             .small()
-                                            .color(egui::Color32::DARK_GRAY),
+                                            .color(egui::Color32::from_rgb(190, 190, 195)),
                                     );
                                     ui.with_layout(
                                         egui::Layout::right_to_left(egui::Align::Center),
