@@ -567,7 +567,8 @@ impl eframe::App for SongIndexApp {
                                     let label = if is_active {
                                         egui::RichText::new(&text)
                                             .size(12.5)
-                                            .color(palette::TEXT_PRIMARY)
+                                            .color(palette::BG_DEEP)
+                                            .strong()
                                     } else {
                                         egui::RichText::new(&text)
                                             .size(12.5)
@@ -609,7 +610,8 @@ impl eframe::App for SongIndexApp {
                         let audio_label = if self.filter_audio {
                             egui::RichText::new("Nur mit Audio")
                                 .size(12.5)
-                                .color(palette::AUDIO_GREEN)
+                                .color(palette::BG_DEEP)
+                                .strong()
                         } else {
                             egui::RichText::new("Nur mit Audio")
                                 .size(12.5)
@@ -626,7 +628,8 @@ impl eframe::App for SongIndexApp {
                         let untagged_label = if self.filter_untagged {
                             egui::RichText::new("Ohne Tags")
                                 .size(12.5)
-                                .color(palette::ACCENT)
+                                .color(palette::BG_DEEP)
+                                .strong()
                         } else {
                             egui::RichText::new("Ohne Tags")
                                 .size(12.5)

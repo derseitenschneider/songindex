@@ -37,7 +37,7 @@ fn main() {
 
     eprintln!("Songindex: scanning {}", base_dir.display());
 
-    let db_path = std::env::current_dir().unwrap().join("songindex.db");
+    let db_path = config::data_dir().join("songindex.db");
     let conn = Connection::open(&db_path).expect("Failed to open database");
     conn.execute_batch("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;")
         .ok();

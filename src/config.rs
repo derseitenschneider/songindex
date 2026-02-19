@@ -6,10 +6,16 @@ pub struct Config {
     pub music_dir: PathBuf,
 }
 
+pub fn data_dir() -> PathBuf {
+    let dir = dirs::data_dir()
+        .expect("Cannot determine data directory")
+        .join("songindex");
+    std::fs::create_dir_all(&dir).expect("Cannot create data directory");
+    dir
+}
+
 pub fn config_path() -> PathBuf {
-    std::env::current_dir()
-        .expect("Cannot get current directory")
-        .join("config.toml")
+    data_dir().join("config.toml")
 }
 
 pub fn load_config() -> Option<Config> {
