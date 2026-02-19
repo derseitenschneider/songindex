@@ -1,7 +1,9 @@
+mod config;
 mod db;
 mod scanner;
 mod ui;
 
+use config::{load_config, save_config, Config};
 use db::init_db;
 use eframe::egui;
 use notify::{RecursiveMode, Watcher};
@@ -11,11 +13,27 @@ use std::sync::{Arc, Mutex};
 use ui::SongIndexApp;
 
 fn main() {
-    let base_dir = std::env::current_dir()
-        .expect("Cannot get current directory")
-        .parent()
-        .expect("Cannot get parent directory")
-        .to_path_buf();
+    let base_dir = match load_config() {
+        Some(cfg) if cfg.music_dir.is_dir() => cfg.music_dir,
+        _ => {
+            eprintln!("Songindex: no config found, opening folder picker...");
+            match rfd::FileDialog::new()
+                .set_title("Musikordner auswählen")
+                .pick_folder()
+            {
+                Some(dir) => {
+                    save_config(&Config {
+                        music_dir: dir.clone(),
+                    });
+                    dir
+                }
+                None => {
+                    eprintln!("Songindex: no folder selected, exiting.");
+                    return;
+                }
+            }
+        }
+    };
 
     eprintln!("Songindex: scanning {}", base_dir.display());
 

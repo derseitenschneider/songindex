@@ -1,3 +1,4 @@
+use crate::config::{save_config, Config};
 use crate::db::*;
 use eframe::egui;
 use rusqlite::Connection;
@@ -85,6 +86,9 @@ pub struct SongIndexApp {
     edit_modal: Option<EditModalState>,
     confirm_remove: Option<ConfirmRemoveTag>,
 
+    // Settings
+    show_settings: bool,
+
     needs_refresh: bool,
 }
 
@@ -117,6 +121,7 @@ impl SongIndexApp {
             tag_modal: None,
             edit_modal: None,
             confirm_remove: None,
+            show_settings: false,
             needs_refresh: false,
         }
     }
@@ -197,6 +202,10 @@ impl eframe::App for SongIndexApp {
             ui.horizontal(|ui| {
                 ui.heading("Songindex");
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if ui.button("\u{2699}").on_hover_text("Einstellungen").clicked() {
+                        self.show_settings = !self.show_settings;
+                    }
+                    ui.separator();
                     ui.label(
                         egui::RichText::new(format!("{} ohne Tags", self.stats.untagged_songs))
                             .small()
@@ -506,6 +515,46 @@ impl eframe::App for SongIndexApp {
                 }
             }
         });
+
+        // Settings window
+        if self.show_settings {
+            let mut open = true;
+            egui::Window::new("Einstellungen")
+                .open(&mut open)
+                .collapsible(false)
+                .resizable(false)
+                .fixed_size([450.0, 120.0])
+                .show(ctx, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.label("Musikordner:");
+                        ui.label(
+                            egui::RichText::new(self.base_dir.display().to_string())
+                                .small()
+                                .color(egui::Color32::from_rgb(190, 190, 195)),
+                        );
+                    });
+                    ui.add_space(8.0);
+                    if ui.button("Ordner ändern").clicked() {
+                        if let Some(new_dir) = rfd::FileDialog::new()
+                            .set_title("Musikordner auswählen")
+                            .set_directory(&self.base_dir)
+                            .pick_folder()
+                        {
+                            save_config(&Config {
+                                music_dir: new_dir.clone(),
+                            });
+                            self.base_dir = new_dir;
+                            let conn = self.db.lock().unwrap();
+                            crate::scanner::scan_directory(&conn, &self.base_dir);
+                            drop(conn);
+                            self.refresh_data();
+                        }
+                    }
+                });
+            if !open {
+                self.show_settings = false;
+            }
+        }
 
         // Tag modal
         let mut close_tag_modal = false;
