@@ -1,0 +1,4 @@
+/target
+songindex.db
+songindex.db-shm
+songindex.db-wal
