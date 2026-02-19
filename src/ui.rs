@@ -475,7 +475,8 @@ impl eframe::App for SongIndexApp {
                                 egui::RichText::new("Suche nach Titel oder Artist...")
                                     .color(palette::TEXT_MUTED),
                             )
-                            .text_color(palette::TEXT_PRIMARY),
+                            .text_color(palette::TEXT_PRIMARY)
+                            .margin(egui::Margin::symmetric(8.0, 4.0)),
                     );
                     if response.changed() {
                         search_changed = true;

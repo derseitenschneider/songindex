@@ -3,7 +3,15 @@ use notify::{Event, EventKind, RecommendedWatcher};
 use rusqlite::{params, Connection};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
+use unicode_normalization::UnicodeNormalization;
 use walkdir::WalkDir;
+
+/// Normalize a lossy string from the filesystem to NFC form.
+/// macOS stores filenames in NFD (decomposed), which causes combining
+/// characters (e.g. "a" + U+0308) to render as boxes in egui.
+fn nfc(s: std::borrow::Cow<'_, str>) -> String {
+    s.nfc().collect()
+}
 
 struct AutoTag {
     pattern: &'static str,
@@ -99,9 +107,9 @@ fn find_audio_match(base_dir: &Path, song_title: &str) -> Option<String> {
             let ext_lower = ext.to_string_lossy().to_lowercase();
             if ext_lower == "mp3" || ext_lower == "wav" || ext_lower == "m4a" {
                 if let Some(stem) = path.file_stem() {
-                    if stem.to_string_lossy().to_lowercase().contains(&title_lower) {
+                    if nfc(stem.to_string_lossy()).to_lowercase().contains(&title_lower) {
                         if let Ok(rel) = path.strip_prefix(base_dir) {
-                            return Some(rel.to_string_lossy().to_string());
+                            return Some(nfc(rel.to_string_lossy()));
                         }
                     }
                 }
@@ -139,15 +147,15 @@ pub fn scan_directory(conn: &Connection, base_dir: &Path) {
         }
 
         let rel_path = match path.strip_prefix(base_dir) {
-            Ok(r) => r.to_string_lossy().to_string(),
+            Ok(r) => nfc(r.to_string_lossy()),
             Err(_) => continue,
         };
 
-        let filename = path
-            .file_name()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .to_string();
+        let filename = nfc(
+            path.file_name()
+                .unwrap_or_default()
+                .to_string_lossy(),
+        );
 
         found_paths.push(rel_path.clone());
 
@@ -222,7 +230,7 @@ fn add_single_file(conn: &Connection, base_dir: &Path, file_path: &Path) {
     }
 
     let rel_path = match file_path.strip_prefix(base_dir) {
-        Ok(r) => r.to_string_lossy().to_string(),
+        Ok(r) => nfc(r.to_string_lossy()),
         Err(_) => return,
     };
 
@@ -239,11 +247,12 @@ fn add_single_file(conn: &Connection, base_dir: &Path, file_path: &Path) {
         return;
     }
 
-    let filename = file_path
-        .file_name()
-        .unwrap_or_default()
-        .to_string_lossy()
-        .to_string();
+    let filename = nfc(
+        file_path
+            .file_name()
+            .unwrap_or_default()
+            .to_string_lossy(),
+    );
 
     let (titel, artist) = parse_filename(&filename);
     let audio_match = find_audio_match(base_dir, &titel);
@@ -271,7 +280,7 @@ fn add_single_file(conn: &Connection, base_dir: &Path, file_path: &Path) {
 
 fn remove_single_file(conn: &Connection, base_dir: &Path, file_path: &Path) {
     let rel_path = match file_path.strip_prefix(base_dir) {
-        Ok(r) => r.to_string_lossy().to_string(),
+        Ok(r) => nfc(r.to_string_lossy()),
         Err(_) => return,
     };
 

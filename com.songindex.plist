@@ -6,10 +6,10 @@
     <string>com.songindex</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/brianboy/Library/CloudStorage/Dropbox/3-Resources/unterrichtsmaterial/songindex/target/release/songindex</string>
+        <string>/Users/brianboy/dev/personal/songindex/target/release/songindex</string>
     </array>
     <key>WorkingDirectory</key>
-    <string>/Users/brianboy/Library/CloudStorage/Dropbox/3-Resources/unterrichtsmaterial/songindex</string>
+    <string>/Users/brianboy/dev/personal/songindex</string>
     <key>RunAtLoad</key>
     <true/>
     <key>StandardOutPath</key>
